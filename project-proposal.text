@@ -1,0 +1,47 @@
+COMP 50CP Project Proposal
+Matthew Yaspan, Isabelle Sennett, Alex King
+
+Group name: videosearch
+
+Project idea: Search video database by video/gif for a given video and context.
+This will involve video, gif and image processing in Python, with a possible
+opportunity to offload similarity processing to Erlang. We would be able to 
+search the database with many threads at once, utilizing concurrency to speed
+up the search process.
+
+Minimum and maximum deliverable: At the minimum, we will want a console 
+application that searches a local, predefined database of video, perhaps as
+little as a few minutes of video total. A user would be able to specify an input
+file, either a short mp4 video or a gif image, and the gif's contents would be
+searched for in the database. Upon finding a close match using a frame-by-frame
+image similarity mechanism, our program would print to the console the matched
+video and information about it. At absolute minimum, we would search solely
+by the first frame of the input.
+
+At maximum, we would create a GUI to power our parallel searching algorithm, 
+which could hopefully harness a database of a larger quantity of video. We could
+search mp4 or gif input, and use a more complex similarity algorithm to match
+input to source material. We can push for the best similarity mechanism possible
+so that even very low-resolution material could be searched and still be 
+matched. In the case of a media search, such as a "gifs from films" search, we 
+could provide detailed information about the matched content, such as video
+information, title, year, and ways to access the full video. (We imagine using
+publically available videos as a test database.) We also would love to make our
+similarity processing as robust as possible: matching input even when filters
+have been applied, and even when speeds are not the same (which is a common
+DRM circumvention method when uploading copywrited content to YouTube).
+
+First step: We will want to investigate gif and mp4 libraries in Python, as well
+as look into possible design choices that would allow us to offload some of 
+the parallel computation to Erlang. Regardless, we will break the project down
+into major modules (video/image similarity, GUI, parallel search) and work on
+figuring out which libraries and modules will be necessary for each.
+
+Biggest problem we foresee: We were excited about the prospect of using Erlang,
+but we are very excited by this idea, and Python's usefulness with media makes
+it a natural fit. We are curious to explore if there is any opportunity to 
+serialize information that Erlang could interpret and then comprehend in a 
+parallel fashion. If not, we are also interested in the multiprocessing module
+in Python, as it could be another way we could improve runtime, as we have 
+seen that the multithreaded Python we have written so far does not actually
+translate to multicore speed gains.
