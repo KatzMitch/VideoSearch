@@ -7,6 +7,7 @@ from __future__ import division
 import subprocess as sp
 import numpy
 from PIL import Image
+from framediff import frame_rmse
 
 from moviepy.video.io.ffmpeg_reader import FFMPEG_VideoReader
 
@@ -14,6 +15,8 @@ FRAMES_PER_SECOND = 30 # This could be defined globally, or something else
 
 # Initialize an instance of this class with the video you want to access
 video = FFMPEG_VideoReader('chrg.mp4')
+
+# Below are a few iterations to demonstrate functionality
 
 for x in range(15):
 
@@ -42,3 +45,8 @@ for y in range(5):
     newimage = Image.new('RGB', (len(img[0]), len(img)))
     newimage.putdata([tuple(p) for row in img for p in row])
     newimage.save(str(y) + "timetest.png")
+
+# See difference between first and second frame
+frame0 = video.get_frame(0/30)
+frame1 = video.get_frame(1/30)
+print frame_rmse(frame0, frame1)
