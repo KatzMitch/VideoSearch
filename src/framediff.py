@@ -59,6 +59,8 @@ def _add_to_sum(pixels1, pixels2, w_min, w_max, h_min, h_max):
 
 def frame_rmse(img1, img2):
     """Returns root-mean-square error between two NumPy image buffers"""
+    global diff_sum
+    diff_sum = mp.Value('l', 0) # Reset value on each call, else it persists
     width1, height1 = len(img1[0]), len(img1)
     width2, height2 = len(img2[0]), len(img2)
     section_width = width1 / NUM_COLS
