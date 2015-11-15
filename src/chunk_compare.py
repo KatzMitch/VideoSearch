@@ -40,6 +40,7 @@ def startpoint_compare(orig_vid_name, comp_vid_name, comp_vid_start):
 		frameO = orig_vid.read_frame()
 		frameC = comp_vid.read_frame()
 
+	print "SCORE: ", run_avg / length
 	return run_avg / length
 
 def calc_rmse(frameC, frameO):
