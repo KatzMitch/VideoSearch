@@ -31,9 +31,12 @@ def startpoint_compare(orig_vid_name, comp_vid_name, comp_vid_start):
 		exit(1)
 
 	fileinfo = ffmpeg_parse_infos(orig_vid_name)
-	length = int(floor(fileinfo['duration'] * fileinfo['video_fps']))
+	print "length", length = int(floor(fileinfo['duration'] * fileinfo['video_fps']))
+    print "frames", print orig_vid.nframes
 
 	frameC = comp_vid.get_frame(comp_vid_start * fileinfo['video_fps'])
+	comp_vid.read_frame() # Sync up each video. NOTE: temporary solution; there
+						  # should be a "seek" method we can use
 	frameO = orig_vid.read_frame()
 	for i in range(comp_vid_start, length + comp_vid_start):
 		calc_rmse(frameC, frameO)
