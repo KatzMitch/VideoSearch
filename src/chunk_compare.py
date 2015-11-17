@@ -13,6 +13,7 @@ import ctypes
 FPS = 30
 run_avg = 0.0
 
+
 def comparechunk(orig_vid_name, comp_vid_name, comp_vid_start, comp_vid_end):
 	return
 	# for frame in comp_vid
