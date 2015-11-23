@@ -51,15 +51,13 @@ class LightSwitch:
 			self.finishedLock.release()
 
 
-
 # chunk db video according to our specifications. for each chunk,
 # spawn off a job that contains two unique open FFMPEG_VideoReaders
 # to a query and database video, with the database video starting
 # at the start of the chunk.
 def chunkVideo(queryVideoPath, dbVideoPath):
 	global jobQueue
-	chunkThreads = []
-
+	
 	queryVideo = FFMPEG_VideoReader(queryVideoPath)
 	dbVideo = FFMPEG_VideoReader(dbVideoPath)
 
@@ -80,7 +78,6 @@ def chunkVideo(queryVideoPath, dbVideoPath):
 	    
 	    jobQueue.put(Job(qV, dV, startPoint, endPoint, chunksProcessed)))
 
-
     chunksProcessed.wait()
     #  code to reap score
 
@@ -91,7 +88,7 @@ def chunkVideo(queryVideoPath, dbVideoPath):
 # a path to the query video and database video to the chunkVideo function
 def prepareToCompare(queryVideoPath, testFilesPath):
 	processes = []
-	
+
 	videoLibrary = os.listdir(testFilesPath)
 	#queryVideo = FFMPEG_VideoReader(queryVideoPath)
 	for video in videoLibrary:
