@@ -19,7 +19,7 @@ cvid_name = ""
 def map_func(startpoint):
 	startpoint_compare(ovid_name, cvid_name, startpoint)
 
-def comparechunk(orig_vid_name, comp_vid_name, comp_vid_start, comp_vid_end, thresh):
+def comparechunk(orig_vid_name, comp_vid_name, comp_vid_start, comp_vid_end):
 	# for frame in comp_vid
 	comp_vid = FFMPEG_VideoReader(comp_vid_name)
 	orig_vid = FFMPEG_VideoReader(orig_vid_name)
