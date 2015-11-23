@@ -44,12 +44,9 @@ class LightSwitch:
 			self.finishedLock.release()
 
 
-
-
 def chunkVideo(queryVideo, dbVideo):
 	global jobQueue
 	chunkThreads = []
-
 
 	finalChunkSize = queryVideo.nframes
 	numChunks = math.ceil(dbVideo.nframes / queryVideo.nframes)
@@ -66,18 +63,13 @@ def chunkVideo(queryVideo, dbVideo):
 	    
 	    jobQueue.put(Job(dbVideo, startPoint, endPoint, chunksProcessed)))
 
-
     chunksProcessed.wait()
     # (weighted?) average of scores
 
 
-
-
-
-
 def prepareToCompare(queryVideoPath, testFilesPath):
 	threads = []
-	
+
 	videoLibrary = os.listdir(testFilesPath)
 	queryVideo = FFMPEG_VideoReader(queryVideoPath)
 	for video in videoLibrary:
