@@ -1,3 +1,7 @@
+# COMP50CP Final Project- Video Search
+# chunk_compare.py
+# File written by Mitchell Katz
+
 from __future__ import division
 
 import multiprocessing as mp
@@ -9,11 +13,10 @@ from math import floor
 from PIL import Image
 import ctypes
 
-"""
-This function takes the names of the files to compare, and where in the
-comparison file to begin checking from. Threshold is a user determined value
-that they chose qualitatively, and the GUI turned into a quantitative number
-"""
+
+# This function takes the names of the files to compare, and where in the
+# comparison file to begin checking from. Threshold is a user determined value
+# that they chose qualitatively, and the GUI turned into a quantitative number
 def comparechunk(orig_vid_name, comp_vid_name, comp_vid_start, comp_vid_end, thresh):
 	# Create the FFMPEG class variables
 	comp_vid = FFMPEG_VideoReader(comp_vid_name)
@@ -49,14 +52,13 @@ def comparechunk(orig_vid_name, comp_vid_name, comp_vid_start, comp_vid_end, thr
 	for startpoint in below_thresh:
 		score = startpoint_compare(orig_vid_name, comp_vid_name, startpoint)
 		if score < thresh:
-			scores.append((orig_vid_name, startpoint, score))
+			scores.append((orig_vid_name,
+				seconds_to_timestamp(startpoint / orig_vid.fps), score))
 
 	return scores
 
-"""
-Startpoint compare take a frame number worth pursuing, and calculates the
-average rmse value for the duration of the video starting at that point
-"""
+# Startpoint compare take a frame number worth pursuing, and calculates the
+# average rmse value for the duration of the video starting at that point
 def startpoint_compare(orig_vid_name, comp_vid_name, comp_vid_start):
 	#Create the FFMPEG class variables
 	comp_vid = FFMPEG_VideoReader(comp_vid_name)
