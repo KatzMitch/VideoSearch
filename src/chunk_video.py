@@ -11,6 +11,7 @@ from PIL import Image
 import Queue
 import ctypes
 import os
+from chunk_compare import comparechunk
 
 FPS = 30
 
