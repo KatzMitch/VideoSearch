@@ -15,6 +15,7 @@ from moviepy.video.io.ffmpeg_reader import FFMPEG_VideoReader
 from chunk_compare import comparechunk
 from pprint import pprint
 import glob
+import os
 
 class Consumer(mp.Process):
     """
@@ -46,26 +47,10 @@ class Consumer(mp.Process):
 def percent_to_thresh(percent):
 	return (percent/2) + 10
 
-def main():
-    """
-    Parses command line arguments for a query video and database video. Generates
-    jobs for consumer threads, starts each consumer, waits for all to complete.
-    threshold is a number from 0-100 which we translate into a threshold value
-    """
-    if len(sys.argv) != 4:
-        print "Usage: python producer.py input.mp4 source.mp4 threshold"
-        exit(1)
 
-    queryPath = sys.argv[1]
-    dbPath    = sys.argv[2]
-    threshold = percent_to_thresh(int(sys.argv[3]))
-
-    files = glob.glob(dbPath+"*.mp4")
-    print files
-    for aFile in files:
-    	print "testing:", queryPath, aFile, threshold
-    	start_search(queryPath, aFile, threshold)
-
+"""
+Generates jobs for consumer threads, starts each consumer, waits for all to complete.
+"""
 def start_search(queryPath, dbPath, threshold):
     queryVid  = FFMPEG_VideoReader(queryPath)
     dbVid     = FFMPEG_VideoReader(dbPath)
@@ -124,6 +109,38 @@ def start_search(queryPath, dbPath, threshold):
         num_jobs -= 1
 
     return 0
+
+def server_entry(queryPath, dbPath, threshold):
+	if os.path.isdir(dbPath):
+		files = glob.glob(dbPath+"*.mp4")
+		print files
+		for aFile in files:
+			print "testing:", queryPath, aFile, threshold
+			start_search(queryPath, aFile, threshold)
+	else:
+		start_search(queryPath, dbPath, threshold)
+
+def main():
+	"""
+	Parses command line arguments for a query video and database video.
+	threshold is a number from 0-100 which we translate into a threshold value
+	"""
+	if len(sys.argv) != 4:
+		print "Usage: python producer.py input.mp4 source.mp4 threshold"
+		exit(1)
+
+	queryPath = sys.argv[1]
+	dbPath    = sys.argv[2]
+	threshold = percent_to_thresh(int(sys.argv[3]))
+
+	if os.path.isdir(dbPath):
+		files = glob.glob(dbPath+"*.mp4")
+		print files
+		for aFile in files:
+			print "testing:", queryPath, aFile, threshold
+			start_search(queryPath, aFile, threshold)
+	else:
+		start_search(queryPath, dbPath, threshold)
 
 if __name__ == '__main__':
     main()
