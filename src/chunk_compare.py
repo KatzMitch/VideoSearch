@@ -10,20 +10,13 @@ from moviepy.video.io.ffmpeg_reader import FFMPEG_VideoReader
 from multiprocessing import Semaphore
 from pprint import pprint
 
-print_mutex = Semaphore(1)
-
-def callback(scores):
-	print_mutex.acquire()
-	pprint(scores)
-	print_mutex.release()
-
 # This function takes the names of the files to compare, and where in the
 # comparison file to begin checking from. Threshold is a user determined value
 # that they chose qualitatively, and the GUI turned into a quantitative number
 # Args: path to query video, path to comparison video, start frame number, endframe number,
 # callback to process results, RMSE threshold (a number from 0-255, realistically should be
 #  between 10-50)
-def comparechunk(orig_vid_name, comp_vid_name, comp_start, comp_end, aCallback, thresh = 30.0):
+def comparechunk(orig_vid_name, comp_vid_name, comp_start, comp_end, thresh = 30.0):
 	# Create the FFMPEG class variables
 	comp_vid = FFMPEG_VideoReader(comp_vid_name)
 	orig_vid = FFMPEG_VideoReader(orig_vid_name)
@@ -57,8 +50,6 @@ def comparechunk(orig_vid_name, comp_vid_name, comp_start, comp_end, aCallback, 
 			scores.append(({"Video Name":orig_vid_name},
 						   {"Startpoint":seconds_to_timestamp(startpoint / orig_vid.fps)},
 						   {"Score":score}))
-
-	callback(scores)
 
 # Startpoint compare take a frame number worth pursuing, and calculates the
 # average rmse value for the duration of the video starting at that point

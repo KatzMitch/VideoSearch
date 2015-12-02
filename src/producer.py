@@ -36,23 +36,28 @@ class Consumer(mp.Process):
             print '%s: %s' % (proc_name, next_task)
             answer = comparechunk(next_task[0], next_task[1], 
                                   next_task[2], next_task[3],
-                                  next_task[4], next_task[5])
+                                  next_task[4])
             self.task_queue.task_done()
             self.result_queue.put(answer)
         return
+
+def percent_to_thresh(percent):
+	return (percent/2) + 10
 
 def main():
     """
     Parses command line arguments for a query video and database video. Needs to
     be modified to take in a *directory* of database videos instead. Generates
     jobs for consumer threads, starts each consumer, waits for all to complete.
+    threshold is a number from 0-100 which we translate into a threshold value
     """
-    if len(sys.argv) != 3:
-        print "Usage: python producer.py input.mp4 source.mp4"
+    if len(sys.argv) != 4:
+        print "Usage: python producer.py input.mp4 source.mp4 threshold"
         exit(1)
 
     queryPath = sys.argv[1]
     dbPath    = sys.argv[2]
+    threshold = percent_to_thresh(int(sys.argv[3]))
     queryVid = FFMPEG_VideoReader(queryPath)
     dbVid    = FFMPEG_VideoReader(dbPath)
     jobQueue      = mp.JoinableQueue()
@@ -75,6 +80,7 @@ def main():
     num_consumers = len(boundaries) # This can be easily modified
     num_jobs      = len(boundaries)
 
+    print "Threshold:", threshold
     print 'Creating %d consumers' % num_consumers
     consumers = [ Consumer(jobQueue, resultsQueue)
                   for i in xrange(num_consumers) ]
@@ -86,7 +92,7 @@ def main():
     # Now we need to make a job queue. A job must have all of the arguments for 
     # comparechunk.
     for item in boundaries:
-        jobQueue.put([queryPath, dbPath, item[0], item[1], None, 30])
+        jobQueue.put([queryPath, dbPath, item[0], item[1], threshold])
 
     # This technique forces each thread to eventually consume a job that tells
     # them to stop, allowing us to join safely afterwards.
