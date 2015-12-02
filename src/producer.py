@@ -44,9 +44,12 @@ class Consumer(mp.Process):
             self.result_queue.put(answer)
         return
 
+"""
+Translate a percentage threshold (passed by client) into a parameter within the
+range 10-60
+"""
 def percent_to_thresh(percent):
 	return (percent/2) + 10
-
 
 """
 Generates jobs for consumer threads, starts each consumer, waits for all to complete.
@@ -104,8 +107,9 @@ def start_search(queryPath, dbPath, threshold):
     # Print resultsQueue
     while num_jobs:
         result = resultsQueue.get()
-        print 'Result:',
-        pprint(result)
+        if result is not []:
+        	print 'Result:',
+        	pprint(result)
         num_jobs -= 1
 
     return 0

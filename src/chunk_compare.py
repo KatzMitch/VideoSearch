@@ -42,7 +42,8 @@ def comparechunk(orig_vid_name, comp_vid_name, comp_start, comp_end, thresh = 30
 		score = startpoint_compare(orig_vid_name, comp_vid_name, startpoint)
 		if score < thresh and score is not None:
 			scores.append(({"Video Name":orig_vid_name},
-						   {"Startpoint":seconds_to_timestamp(startpoint / orig_vid.fps)},
+						   {"Timestamp":seconds_to_timestamp(startpoint / orig_vid.fps)},
+						   {"Frame Number": startpoint},
 						   {"Score":score}))
 
 	return scores
