@@ -1,20 +1,29 @@
+# COMP50CP Final Project- Video Search
+# chunk_compare.py
+# File written by Mitchell Katz
+
 from __future__ import division
 
-import multiprocessing as mp
-import numpy
 from framediff import frame_rmse
-from time_convert import timestamp_to_seconds, seconds_to_timestamp
+from time_convert import seconds_to_timestamp
 from moviepy.video.io.ffmpeg_reader import FFMPEG_VideoReader
-from math import floor
-from PIL import Image
-import ctypes
+from multiprocessing import Semaphore
+from pprint import pprint
 
-"""
-This function takes the names of the files to compare, and where in the
-comparison file to begin checking from. Threshold is a user determined value
-that they chose qualitatively, and the GUI turned into a quantitative number
-"""
-def comparechunk(orig_vid_name, comp_vid_name, comp_vid_start, comp_vid_end, thresh):
+print_mutex = Semaphore(1)
+
+def callback(scores):
+	print_mutex.acquire()
+	pprint(scores)
+	print_mutex.release()
+
+# This function takes the names of the files to compare, and where in the
+# comparison file to begin checking from. Threshold is a user determined value
+# that they chose qualitatively, and the GUI turned into a quantitative number
+# Args: path to query video, path to comparison video, start frame number, endframe number,
+# callback to process results, RMSE threshold (a number from 0-255, realistically should be
+#  between 10-50)
+def comparechunk(orig_vid_name, comp_vid_name, comp_start, comp_end, aCallback, thresh = 30.0):
 	# Create the FFMPEG class variables
 	comp_vid = FFMPEG_VideoReader(comp_vid_name)
 	orig_vid = FFMPEG_VideoReader(orig_vid_name)
@@ -24,10 +33,6 @@ def comparechunk(orig_vid_name, comp_vid_name, comp_vid_start, comp_vid_end, thr
 	if comp_vid.fps != orig_vid.fps:
 		print "OOPS!"
 		exit(1)
-
-	# Calculate the starting and end frame numbers
-	comp_start = int(floor(timestamp_to_seconds(comp_vid_start) * comp_vid.fps))
-	comp_end = int(floor(timestamp_to_seconds(comp_vid_end) * comp_vid.fps))
 
 	# Skip to the correct frames in the video
 	frameO = orig_vid.get_frame(0)
@@ -48,15 +53,15 @@ def comparechunk(orig_vid_name, comp_vid_name, comp_vid_start, comp_vid_end, thr
 	scores = []
 	for startpoint in below_thresh:
 		score = startpoint_compare(orig_vid_name, comp_vid_name, startpoint)
-		if score < thresh:
-			scores.append((orig_vid_name, startpoint, score))
+		if score < thresh and score is not None:
+			scores.append(({"Video Name":orig_vid_name},
+						   {"Startpoint":seconds_to_timestamp(startpoint / orig_vid.fps)},
+						   {"Score":score}))
 
-	return scores
+	callback(scores)
 
-"""
-Startpoint compare take a frame number worth pursuing, and calculates the
-average rmse value for the duration of the video starting at that point
-"""
+# Startpoint compare take a frame number worth pursuing, and calculates the
+# average rmse value for the duration of the video starting at that point
 def startpoint_compare(orig_vid_name, comp_vid_name, comp_vid_start):
 	#Create the FFMPEG class variables
 	comp_vid = FFMPEG_VideoReader(comp_vid_name)

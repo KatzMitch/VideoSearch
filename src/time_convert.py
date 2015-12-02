@@ -11,6 +11,6 @@ def timestamp_to_seconds(timestamp):
 	return int(delta.total_seconds())
 
 def seconds_to_timestamp(seconds):
-	m, s = divmov(seconds, 60)
-	h, m = divmov(m, 60)
+	m, s = divmod(seconds, 60)
+	h, m = divmod(m, 60)
 	return ("%02d:%02d:%02d" % (h, m, s))
