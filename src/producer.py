@@ -48,8 +48,7 @@ def percent_to_thresh(percent):
 
 def main():
     """
-    Parses command line arguments for a query video and database video. Needs to
-    be modified to take in a *directory* of database videos instead. Generates
+    Parses command line arguments for a query video and database video. Generates
     jobs for consumer threads, starts each consumer, waits for all to complete.
     threshold is a number from 0-100 which we translate into a threshold value
     """
@@ -60,8 +59,11 @@ def main():
     queryPath = sys.argv[1]
     dbPath    = sys.argv[2]
     threshold = percent_to_thresh(int(sys.argv[3]))
-    files = glob.glob(dbPath)
+
+    files = glob.glob(dbPath+"*.mp4")
+    print files
     for aFile in files:
+    	print "testing:", queryPath, aFile, threshold
     	start_search(queryPath, aFile, threshold)
 
 def start_search(queryPath, dbPath, threshold):
@@ -70,6 +72,11 @@ def start_search(queryPath, dbPath, threshold):
     jobQueue      = mp.JoinableQueue()
     resultsQueue  = mp.Queue()
     boundaries = []
+
+    # Both videos must have equal frame rates
+    if queryVid.fps != dbVid.fps:
+		print "FPSs must match!"
+		return
 
     # Make ranges that are twice the length of the input video, overlapping by
     # length of input video,
