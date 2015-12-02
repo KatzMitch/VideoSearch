@@ -13,6 +13,8 @@ import sys
 import multiprocessing as mp
 from moviepy.video.io.ffmpeg_reader import FFMPEG_VideoReader
 from chunk_compare import comparechunk
+from pprint import pprint
+import glob
 
 class Consumer(mp.Process):
     """
@@ -58,8 +60,13 @@ def main():
     queryPath = sys.argv[1]
     dbPath    = sys.argv[2]
     threshold = percent_to_thresh(int(sys.argv[3]))
-    queryVid = FFMPEG_VideoReader(queryPath)
-    dbVid    = FFMPEG_VideoReader(dbPath)
+    files = glob.glob(dbPath)
+    for aFile in files:
+    	start_search(queryPath, aFile, threshold)
+
+def start_search(queryPath, dbPath, threshold):
+    queryVid  = FFMPEG_VideoReader(queryPath)
+    dbVid     = FFMPEG_VideoReader(dbPath)
     jobQueue      = mp.JoinableQueue()
     resultsQueue  = mp.Queue()
     boundaries = []
@@ -105,7 +112,8 @@ def main():
     # Print resultsQueue
     while num_jobs:
         result = resultsQueue.get()
-        print 'Result:', result
+        print 'Result:',
+        pprint(result)
         num_jobs -= 1
 
     return 0

@@ -50,6 +50,8 @@ def comparechunk(orig_vid_name, comp_vid_name, comp_start, comp_end, thresh = 30
 			scores.append(({"Video Name":orig_vid_name},
 						   {"Startpoint":seconds_to_timestamp(startpoint / orig_vid.fps)},
 						   {"Score":score}))
+			
+	return scores
 
 # Startpoint compare take a frame number worth pursuing, and calculates the
 # average rmse value for the duration of the video starting at that point
