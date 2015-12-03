@@ -24,12 +24,12 @@ from PIL import Image
 import multiprocessing as mp
 
 # In testing, 16 threads led to the best performance (~75% speed gain)
-NUM_ROWS = 4
-NUM_COLS = 4
+NUM_ROWS = 1
+NUM_COLS = 1
 
 # In testing, making each image an 8th of its original side led to better 
 # performance (~85% better) and very little overall noise in the diff readings
-DENOM    = 8
+DENOM    = 32
 
 diff_sum = mp.Value('l', 0) # Store total diff in a long integer
 
