@@ -2,20 +2,15 @@ from __future__ import division
 
 import multiprocessing as mp
 import numpy
-from framediff import frame_rmse
-from time_convert import timestamp_to_seconds
+import threading
+import os
+import math
 from moviepy.video.io.ffmpeg_reader import FFMPEG_VideoReader
 from moviepy.video.io.ffmpeg_reader import ffmpeg_parse_infos
-from math import floor
-from PIL import Image
-import Queue
-import ctypes
-import os
 
 FPS = 30
 
 scores = {}
-jobQueue = mp.Queue()
 
 
 # A job gives a FFMPEG object
@@ -25,9 +20,7 @@ class Job:
   	self.dbVideo = dbVideo
   	self.start = start
   	self.finish = finish
-  	self.dbVideo.pos = start
-  	self.pos = self.dbVideo.pos
-  	self.chunksProcessedSwitch = chunksProcessedSwitch
+  	self.chunksProcessedSwitch = chunksProcessed
 
 # Lightswitch: initialized given a number (the number of chunks for a given 
 # video) and holds a semaphore until all of the chunks have been processed,
@@ -37,8 +30,8 @@ class LightSwitch:
 	def __init__(self, targetNum):
 		self.target = targetNum
 		self.finished = 0
-		self.countLock = threading.Lock()
-		self.finishedLock = threading.Semaphore(0)
+		self.countLock = mp.Manager().Lock()
+		self.finishedLock = mp.Manager().Semaphore(0)
 
 	def wait():
 		self.finishedLock.acquire()
@@ -51,55 +44,93 @@ class LightSwitch:
 			self.finishedLock.release()
 
 
-# chunk db video according to our specifications. for each chunk,
-# spawn off a job that contains two unique open FFMPEG_VideoReaders
-# to a query and database video, with the database video starting
-# at the start of the chunk.
-def chunkVideo(queryVideoPath, dbVideoPath):
-	global jobQueue
-	
+
+# spawns a chunkVideo process for each video in the database. passes
+# a path to the query video and database video to the chunkVideo function
+def search(queryVideoPath, testFilesPath):
+	processes = []
+	jobQueue = mp.Manager().Queue()
+	videoLibrary = os.listdir(testFilesPath)
+	#queryVideo = FFMPEG_VideoReader(queryVideoPath)
+	for video in videoLibrary:
+		processes.append(mp.Process(target=chunkVideo,
+	    						    args=[queryVideoPath,
+	    						          testFilesPath + '/' + video,
+	    						          jobQueue]))
+		#chunkVideo(queryVideoPath, testFilesPath + "/" + video, jobQueue)
+	for process in processes:
+		process.start()
+    
+	for process in processes:
+		process.join()
+
+def printJobs(queryVideo, dbVideo, start, finish):
+	print "queryVideo is" + queryVideo
+	print "dbVideo is" + dbVideo
+	print "startpoint is" + str(start)
+	print "endpoint is" + str(finish)
+
+def processJobs(jobQueue, processLock):
+	processLock.acquire()
+	consumers = []
+	while not jobQueue.empty():
+		try:
+			job = jobQueue.get(False)
+			consumer = mp.Process(target=printJobs,
+							      args=[job.queryVideo,
+							      		job.dbVideo,
+							      		job.start,
+							      		job.finish])
+			consumer.start()
+			consumers.append(consumer)
+		except:
+			break;
+
+	processLock.release()
+	for consumer in consumers:
+		consumer.join()
+
+
+def chunkVideo(queryVideoPath, dbVideoPath, jobQueue):
 	queryVideo = FFMPEG_VideoReader(queryVideoPath)
 	dbVideo = FFMPEG_VideoReader(dbVideoPath)
 
 	finalChunkSize = queryVideo.nframes
-	numChunks = math.ceil(dbVideo.nframes / queryVideo.nframes)
-    chunksProcessed = LightSwitch(numChunks)
-	startingChunkSize = dbVideo.frames / numChunks
+	numChunks = int(math.ceil(dbVideo.nframes / float(queryVideo.nframes)))
+	chunksProcessed = LightSwitch(numChunks)
+	startingChunkSize = dbVideo.nframes / numChunks
+
+	processLock = mp.Lock()
+	processLock.acquire()
+	processJob = mp.Process(target=processJobs, args=[jobQueue,
+													  processLock])
+	processJob.start()
 
 	for chunk in range(numChunks):
-		qV = FFMPEG_VideoReader(queryVideoPath)
-		dV = FFMPEG_VideoReader(dbVideoPath)
+		qV = queryVideoPath
+		dV = dbVideoPath
 		startPoint = chunk * startingChunkSize
 		endPoint = (chunk + 1) * startingChunkSize
 		if chunk != 0:
 			startPoint -= (finalChunkSize - startingChunkSize) / 2
+		else:
+			endPoint += (finalChunkSize - startingChunkSize) / 2
+
 		if chunk != (numChunks - 1):
 			endPoint += (finalChunkSize - startingChunkSize) / 2
-	    
-	    jobQueue.put(Job(qV, dV, startPoint, endPoint, chunksProcessed)))
+		else:
+			startPoint -= (finalChunkSize - startingChunkSize) / 2
 
-    chunksProcessed.wait()
-    #  code to reap score
+		if numChunks == 1:
+			startPoint = 0
+			endPoint = dbVideo.nframes - 1
 
+		job = Job(qV, dV, int(startPoint), int(endPoint), chunksProcessed)
+		jobQueue.put(job)
 
+		if chunk == 0:
+			processLock.release()
 
+	processJob.join()
 
-# spawns a chunkVideo process for each video in the database. passes
-# a path to the query video and database video to the chunkVideo function
-def prepareToCompare(queryVideoPath, testFilesPath):
-	processes = []
-
-	videoLibrary = os.listdir(testFilesPath)
-	#queryVideo = FFMPEG_VideoReader(queryVideoPath)
-	for video in videoLibrary:
-	   #dbVideo = FFMPEG_VideoReader(video)
-	    processes.append(mp.Process(target=chunkVideo,
-	    						    args=[queryVideoPath,
-	    						          testFilesPath + '/' + video])
-
-	for process in processes:
-		processes.start()
-
-	for process in process:
-		processes.join()
 
