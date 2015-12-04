@@ -7,6 +7,7 @@ import os
 import math
 from moviepy.video.io.ffmpeg_reader import FFMPEG_VideoReader
 from moviepy.video.io.ffmpeg_reader import ffmpeg_parse_infos
+from chunk_compare import comparechunk
 
 
 # A job gives a FFMPEG object
@@ -72,7 +73,7 @@ def processJobs(jobQueue, processLock):
 	while not jobQueue.empty():
 		try:
 			job = jobQueue.get(False)
-			consumer = mp.Process(target=printJobs,
+			consumer = mp.Process(target=comparechunk,
 							      args=[job.queryVideo,
 							      		job.dbVideo,
 							      		job.start,
@@ -80,7 +81,7 @@ def processJobs(jobQueue, processLock):
 			consumer.start()
 			consumers.append(consumer)
 		except:
-			break;
+			break
 
 	processLock.release()
 	for consumer in consumers:
