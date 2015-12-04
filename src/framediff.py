@@ -23,9 +23,18 @@ import scipy.misc
 from PIL import Image
 import multiprocessing as mp
 
+<<<<<<< HEAD
 NUM_ROWS = 1
 NUM_COLS = 1
 
+=======
+# In testing, 16 threads led to the best performance (~75% speed gain)
+NUM_ROWS = 1
+NUM_COLS = 1
+
+# In testing, making each image an 8th of its original side led to better 
+# performance (~85% better) and very little overall noise in the diff readings
+>>>>>>> bf6818917d9cfb93090f6c990b39cebff1780fb2
 DENOM    = 32
 
 diff_sum = mp.Value('l', 0) # Store total diff in a long integer
