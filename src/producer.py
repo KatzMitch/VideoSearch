@@ -34,13 +34,11 @@ class Consumer(mp.Process):
             next_task = self.task_queue.get()
             if next_task is None:
                 print '%s: Exiting' % proc_name
-                self.task_queue.task_done()
                 break
             print '%s: %s' % (proc_name, next_task)
             answer = comparechunk(next_task[0], next_task[1], 
                                   next_task[2], next_task[3],
                                   next_task[4])
-            self.task_queue.task_done()
             self.result_queue.put(answer)
         return
 
@@ -57,7 +55,7 @@ Generates jobs for consumer threads, starts each consumer, waits for all to comp
 def start_search(queryPath, dbPath, threshold):
     queryVid  = FFMPEG_VideoReader(queryPath)
     dbVid     = FFMPEG_VideoReader(dbPath)
-    jobQueue      = mp.JoinableQueue()
+    jobQueue      = mp.Queue()
     resultsQueue  = mp.Queue()
     boundaries = []
 
