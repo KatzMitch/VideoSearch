@@ -3,7 +3,7 @@
 # Modified by Alex King
 # Entrypoint function for videosearch program
 
-# To use: run "python entrypoint.py input.mp4 database.mp4"
+# To use: run "python producer.py input.mp4 database.mp4"
 
 # This is the producer/interpreter module of our program. It is responsible for
 # surveying the input video and database videos, creating jobs with proper 
@@ -66,20 +66,20 @@ def start_search(queryPath, dbPath, threshold):
 		print "FPSs must match!"
 		return
 
-    # Make ranges that are twice the length of the input video, overlapping by
-    # length of input video,
-    # e.g., input = 50, db = 250; boundaries = 0-100, 50-150, 100-200, 150-250
-    width = 2 * queryVid.nframes
+    # Make ranges that are the length of the input video
+    width = queryVid.nframes
     startFrame = 0
-    endFrame = width
-    boundaries.append([startFrame, endFrame])
 
-    while endFrame < dbVid.nframes:
+    if width > dbVid.nframes:
+        width = dbVid.nframes
+
+    boundaries.append([startFrame, startFrame + width])
+
+    while startFrame < (dbVid.nframes - width):
         startFrame += queryVid.nframes
-        endFrame = startFrame + queryVid.nframes
-        boundaries.append([startFrame, endFrame])
+        boundaries.append([startFrame, startFrame + width])
 
-    num_consumers = len(boundaries) # This can be easily modified
+    num_consumers = 16 # This can be easily modified
     num_jobs      = len(boundaries)
 
     print "Threshold:", threshold
@@ -98,21 +98,18 @@ def start_search(queryPath, dbPath, threshold):
 
     # This technique forces each thread to eventually consume a job that tells
     # them to stop, allowing us to join safely afterwards.
-    for i in boundaries:
+    for i in range(num_consumers):
         jobQueue.put(None)
-
-    # Wait for all of the tasks to finish
-    jobQueue.join()
     
-    # Print resultsQueue
+    # Print resultsQueue as things come in
     while num_jobs:
         result = resultsQueue.get()
-        if result is not []:
-        	print 'Result:',
-        	pprint(result)
+        if len(result) is not 0:
+            print 'Found match below specified threshold:',
+            pprint(result)
         num_jobs -= 1
 
-    return 0
+    return
 
 def server_entry(queryPath, dbPath, threshold):
 	if os.path.isdir(dbPath):
@@ -123,7 +120,6 @@ def server_entry(queryPath, dbPath, threshold):
 			print "testing:", queryPath, aFile, threshold
 			processes.append(mp.Process(target=start_search,
                                           args=[queryPath, aFile, threshold]))
-			#start_search(queryPath, aFile, threshold)
 		for process in processes:
 			process.start()
 		for process in processes:
