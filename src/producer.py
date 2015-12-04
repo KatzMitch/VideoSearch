@@ -118,9 +118,15 @@ def server_entry(queryPath, dbPath, threshold):
 	if os.path.isdir(dbPath):
 		files = glob.glob(dbPath+"*.mp4")
 		print files
+		pprocesses = []
 		for aFile in files:
 			print "testing:", queryPath, aFile, threshold
-			start_search(queryPath, aFile, threshold)
+			processes.append(mp.Process(target=start_search, args=[queryPath, aFile, threshold]))
+			#start_search(queryPath, aFile, threshold)
+		for process in processes:
+			process.start()
+		for process in processes:
+			process.join()
 	else:
 		start_search(queryPath, dbPath, threshold)
 
@@ -140,9 +146,15 @@ def main():
 	if os.path.isdir(dbPath):
 		files = glob.glob(dbPath+"*.mp4")
 		print files
+		processes = []
 		for aFile in files:
 			print "testing:", queryPath, aFile, threshold
-			start_search(queryPath, aFile, threshold)
+			processes.append(mp.Process(target=start_search, args=[queryPath, aFile, threshold]))
+			#start_search(queryPath, aFile, threshold)
+		for process in processes:
+			process.start()
+		for process in processes:
+			process.join()
 	else:
 		start_search(queryPath, dbPath, threshold)
 
