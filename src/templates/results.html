@@ -1,0 +1,39 @@
+<!doctype html>
+<html>
+
+<body>
+
+<h1>Video Search</h1>
+
+{% if vid %}
+    <video width="400" controls autoplay>
+        <source src="{{ vid }}" type="video/m4v">
+        Your browser does not support HTML5 video.
+    </video>
+{% endif %}
+
+{% if word %}
+  <p>Found Word: {{ word }}!</p>
+{% else %}
+  <p>Made by: hello!</p>
+{% endif %}
+
+
+
+</body>
+</html>
+
+
+
+<!-- play.html -->
+
+
+<!-- {% extends 'base.html' %}
+
+{% block play %}
+<h3> {{ title }} </h3>
+    <video width="400" controls autoplay>
+        <source src="static/video/{{ video_file }}" type="video/mp4">
+        Your browser does not support this video format.
+    </video>
+{% endblock %} -->

@@ -1,0 +1,33 @@
+<!doctype html>
+<html>
+
+<body>
+
+<h1>Video Search</h1>
+
+<p><img alt="" src="https://goo.gl/mbnqBl" style="width: 360px; height: 165px;" /></p>
+
+<!-- <p><input name="word to search" type="text" value="search" />&nbsp;<input name="search" type="button" value="Search" /></p> -->
+
+
+<form action="/upload/" method = "POST" enctype="multipart/form-data">
+    <input type="file" name="file"><br /><br />
+<!--     <input type="file" name="vid" accept="video/*"> -->
+    <input type="submit" value = "Upload">
+</form>
+
+
+
+<form action = "/results2/" method="POST" >
+    Search Word:<br>
+    <input name="word" type="text" />&nbsp;
+    <input type="submit" value = "Search">
+</form>
+
+<!-- {% if name %}
+  <p>Made by: {{ name }}!</p>
+{% else %}
+  <p>Made by: here!</p>
+{% endif %} -->
+</body>
+</html>

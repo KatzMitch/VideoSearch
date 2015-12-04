@@ -1,0 +1,27 @@
+Things I still need to fix / do
+
+- Get the results from the program and make sure that it allows live streaming of 
+  results. This will be similar to what I have used to live stream the video so far.
+  Subtasks:
+        - Write the function on the search program end that is compatible with 
+          live streaming and also makes sure that we are passing around ways to 
+          access the videos without passing around the actual thing
+        - make sure the server can continue to connect to the client side (web page).
+          basically make sure it doesn't end until we tell it to
+        - figure out a way to end the search program: 
+            -Client: if the user tells us to end the program by
+                 (1) closing the browser/window
+                 (2) pressing some sort of esc key or button.
+            -Server:
+                On the server/search program side of things I was thinking that we 
+                could keep track of all the results and when our program is finally 
+                done we could return the best result(maybe more then one if there is a tie) 
+                of all of the results. I think this is what we were planing to do but
+                by making this result different from the others when I post this to 
+                the server I can make the result look different from the others. In 
+                order to do this I need to be able to differentiate this from the 
+                other results.
+- Implement error handlers to return more helpful errors to the user when 
+  something wrong happens. The error can be the result of the client or the 
+  server. Some examples include the user uploading a file to search for that is 
+  not mp4. What happens when the server crashes (overload or exit)
