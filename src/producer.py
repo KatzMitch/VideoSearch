@@ -76,7 +76,7 @@ def start_search(queryPath, dbPath, threshold):
 
     while endFrame < dbVid.nframes:
         startFrame += queryVid.nframes
-        endFrame = startFrame + width
+        endFrame = startFrame + queryVid.nframes
         boundaries.append([startFrame, endFrame])
 
     num_consumers = len(boundaries) # This can be easily modified
@@ -121,7 +121,8 @@ def server_entry(queryPath, dbPath, threshold):
 		pprocesses = []
 		for aFile in files:
 			print "testing:", queryPath, aFile, threshold
-			processes.append(mp.Process(target=start_search, args=[queryPath, aFile, threshold]))
+			processes.append(mp.Process(target=start_search,
+                                          args=[queryPath, aFile, threshold]))
 			#start_search(queryPath, aFile, threshold)
 		for process in processes:
 			process.start()
@@ -149,8 +150,8 @@ def main():
 		processes = []
 		for aFile in files:
 			print "testing:", queryPath, aFile, threshold
-			processes.append(mp.Process(target=start_search, args=[queryPath, aFile, threshold]))
-			#start_search(queryPath, aFile, threshold)
+			processes.append(mp.Process(target=start_search,
+                                          args=[queryPath, aFile, threshold]))
 		for process in processes:
 			process.start()
 		for process in processes:
