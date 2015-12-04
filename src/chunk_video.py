@@ -8,40 +8,36 @@ import math
 from moviepy.video.io.ffmpeg_reader import FFMPEG_VideoReader
 from moviepy.video.io.ffmpeg_reader import ffmpeg_parse_infos
 
-FPS = 30
-
-scores = {}
-
 
 # A job gives a FFMPEG object
 class Job:
-  def __init__(self, queryVideo, dbVideo, start, finish, chunksProcessed):
+  def __init__(self, queryVideo, dbVideo, start, finish):
   	self.queryVideo = queryVideo
   	self.dbVideo = dbVideo
   	self.start = start
   	self.finish = finish
-  	self.chunksProcessedSwitch = chunksProcessed
+  	#self.chunksProcessedSwitch = chunksProcessed
 
 # Lightswitch: initialized given a number (the number of chunks for a given 
 # video) and holds a semaphore until all of the chunks have been processed,
 # and when that occurs a thread waiting on the semaphore can proceed to reap
 # the scores of the video's chunks
-class LightSwitch:
-	def __init__(self, targetNum):
-		self.target = targetNum
-		self.finished = 0
-		self.countLock = mp.Manager().Lock()
-		self.finishedLock = mp.Manager().Semaphore(0)
-
-	def wait():
-		self.finishedLock.acquire()
-
-	def finish():
-		self.countLock.acquire()
-		self.finished += 1
-		self.countLock.release()
-		if self.finished == self.target:
-			self.finishedLock.release()
+#class LightSwitch:
+#	def __init__(self, targetNum):
+#		self.target = targetNum
+#		self.finished = 0
+#		self.countLock = mp.Manager().Lock()
+#		self.finishedLock = mp.Manager().Semaphore(0)
+#
+#	def wait():
+#		self.finishedLock.acquire()
+#
+#	def finish():
+#		self.countLock.acquire()
+#		self.finished += 1
+#		self.countLock.release()
+#		if self.finished == self.target:
+#			self.finishedLock.release()
 
 
 
@@ -95,41 +91,28 @@ def chunkVideo(queryVideoPath, dbVideoPath, jobQueue):
 	queryVideo = FFMPEG_VideoReader(queryVideoPath)
 	dbVideo = FFMPEG_VideoReader(dbVideoPath)
 
-	finalChunkSize = queryVideo.nframes
-	numChunks = int(math.ceil(dbVideo.nframes / float(queryVideo.nframes)))
-	chunksProcessed = LightSwitch(numChunks)
-	startingChunkSize = dbVideo.nframes / numChunks
-
 	processLock = mp.Lock()
 	processLock.acquire()
 	processJob = mp.Process(target=processJobs, args=[jobQueue,
 													  processLock])
+
+	width = 2 * queryVideo.nframes
+	startPoint = 0
+	endPoint = width
+	qV = queryVideoPath
+	dV = dbVideoPath
+	job = Job(qV, dV, startPoint, endPoint)
+	jobQueue.put(job)
+	processLock.release()
 	processJob.start()
 
-	for chunk in range(numChunks):
-		qV = queryVideoPath
-		dV = dbVideoPath
-		startPoint = chunk * startingChunkSize
-		endPoint = (chunk + 1) * startingChunkSize
-		if chunk != 0:
-			startPoint -= (finalChunkSize - startingChunkSize) / 2
-		else:
-			endPoint += (finalChunkSize - startingChunkSize) / 2
-
-		if chunk != (numChunks - 1):
-			endPoint += (finalChunkSize - startingChunkSize) / 2
-		else:
-			startPoint -= (finalChunkSize - startingChunkSize) / 2
-
-		if numChunks == 1:
-			startPoint = 0
-			endPoint = dbVideo.nframes - 1
-
-		job = Job(qV, dV, int(startPoint), int(endPoint), chunksProcessed)
+	while endPoint < dbVideo.nframes:
+		startPoint += queryVideo.nframes
+		endPoint = startPoint + width
+		job = Job(qV, dV, startPoint, endPoint)
 		jobQueue.put(job)
 
-		if chunk == 0:
-			processLock.release()
+
 
 	processJob.join()
 
