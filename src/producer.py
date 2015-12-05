@@ -3,7 +3,7 @@
 # Modified by Alex King
 # Entrypoint function for videosearch program
 
-# To use: run "python producer.py input.mp4 database.mp4 threshold"
+# To use: run "python producer.py input.mp4 /path/to/database/ threshold"
 
 # This is the producer/interpreter module of our program. It is responsible for
 # surveying the input video and database videos, creating jobs with proper 
@@ -53,7 +53,8 @@ def percent_to_thresh(percent):
 	return (percent/2) + 10
 
 """
-Generates jobs for consumer threads, starts each consumer, waits for all to complete.
+Generates jobs for consumer threads, starts each consumer, waits for all to
+complete.
 """
 def start_search(queryPath, dbPath, threshold, jobQueue, resultsQueue):
     global global_jobs
