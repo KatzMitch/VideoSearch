@@ -12,13 +12,13 @@
 import sys
 import multiprocessing as mp
 from moviepy.video.io.ffmpeg_reader import FFMPEG_VideoReader
-from chunk_compare import comparechunk
+from chunkCompare import comparechunk
 from pprint import pprint
 import glob
 import os
 
-global_jobs = mp.Value("l", 0)
-job_lock = mp.Lock()
+globalJobs = mp.Value("l", 0)
+jobLock = mp.Lock()
 
 class Consumer(mp.Process):
     """
@@ -26,38 +26,38 @@ class Consumer(mp.Process):
     and adds its answer to the result queue. In our case, each job is a list of
     arguments to comparechunk.
     """
-    def __init__(self, task_queue, result_queue):
+    def __init__(self, taskQueue, resultQueue):
         mp.Process.__init__(self)
-        self.task_queue = task_queue
-        self.result_queue = result_queue
+        self.taskQueue = taskQueue
+        self.resultQueue = resultQueue
 
     def run(self):
-        proc_name = self.name
+        procName = self.name
         while True:
-            next_task = self.task_queue.get()
-            if next_task is None:
-                print '%s: Exiting' % proc_name
+            nextTask = self.taskQueue.get()
+            if nextTask is None:
+                print '%s: Exiting' % procName
                 break
-            print '%s: %s' % (proc_name, next_task)
-            answer = comparechunk(next_task[0], next_task[1], 
-                                  next_task[2], next_task[3],
-                                  next_task[4])
-            self.result_queue.put(answer)
+            print '%s: %s' % (procName, nextTask)
+            answer = comparechunk(nextTask[0], nextTask[1], 
+                                  nextTask[2], nextTask[3],
+                                  nextTask[4])
+            self.resultQueue.put(answer)
         return
 
 """
 Translate a percentage threshold (passed by client) into a parameter within the
 range 10-60
 """
-def percent_to_thresh(percent):
+def percentToThresh(percent):
 	return (percent/3) + 10
 
 """
 Generates jobs for consumer threads, starts each consumer, waits for all to
 complete.
 """
-def start_search(queryPath, dbPath, threshold, jobQueue, resultsQueue):
-    global global_jobs
+def startSearch(queryPath, dbPath, threshold, jobQueue, resultsQueue):
+    global globalKobs
     queryVid  = FFMPEG_VideoReader(queryPath)
     dbVid     = FFMPEG_VideoReader(dbPath)
     boundaries = []
@@ -80,13 +80,13 @@ def start_search(queryPath, dbPath, threshold, jobQueue, resultsQueue):
         startFrame += queryVid.nframes
         boundaries.append([startFrame, startFrame + width])
 
-    num_consumers = 16 # This can be easily modified
-    num_jobs      = len(boundaries)
+    numConsumers = 16 # This can be easily modified
+    numJobs      = len(boundaries)
 
     print "Threshold:", threshold
-    print 'Creating %d consumers' % num_consumers
+    print 'Creating %d consumers' % numConsumers
     consumers = [ Consumer(jobQueue, resultsQueue)
-                  for i in xrange(num_consumers) ]
+                  for i in xrange(numConsumers) ]
 
     # Prepare the workers to consume jobs
     for worker in consumers:
@@ -99,14 +99,14 @@ def start_search(queryPath, dbPath, threshold, jobQueue, resultsQueue):
 
     # This technique forces each thread to eventually consume a job that tells
     # them to stop, allowing us to join safely afterwards.
-    for i in range(num_consumers):
+    for i in range(numConsumers):
         jobQueue.put(None)
     
-    job_lock.acquire()
-    global_jobs.value += num_jobs
-    job_lock.release()
+    jobLock.acquire()
+    globalJobs.value += numJobs
+    jobLock.release()
 
-def server_entry(queryPath, dbPath, threshold, resultsQueue):
+def serverEntry(queryPath, dbPath, threshold, resultsQueue):
 	jobQueue = mp.Queue()
 	if os.path.isdir(dbPath):
 		files = glob.glob(dbPath+"*.mp4")
@@ -114,7 +114,7 @@ def server_entry(queryPath, dbPath, threshold, resultsQueue):
 		processes = []
 		for aFile in files:
 			print "testing:", queryPath, aFile, threshold
-			processes.append(mp.Process(target=start_search,
+			processes.append(mp.Process(target=startSearch,
                                           args=[queryPath, aFile,
                                                 threshold, jobQueue,
                                                 resultsQueue]))
@@ -123,12 +123,12 @@ def server_entry(queryPath, dbPath, threshold, resultsQueue):
 		for process in processes:
 			process.join()
 	else:
-		start_search(queryPath, dbPath, threshold, jobQueue, resultsQueue)
+		startSearch(queryPath, dbPath, threshold, jobQueue, resultsQueue)
 
-	job_lock.acquire()
-	return_val = global_jobs.value
-	job_lock.release()
-	return return_val
+	jobLock.acquire()
+	returnVal = globalJobs.value
+	jobLock.release()
+	return returnVal
 
 def main():
 	"""
@@ -141,7 +141,7 @@ def main():
 
 	queryPath = sys.argv[1]
 	dbPath    = sys.argv[2]
-	threshold = percent_to_thresh(int(sys.argv[3]))
+	threshold = percentToThresh(int(sys.argv[3]))
 	jobQueue = mp.Queue()
 	resultsQueue = mp.Queue()
 
@@ -151,7 +151,7 @@ def main():
 		processes = []
 		for aFile in files:
 			print "testing:", queryPath, aFile, threshold
-			processes.append(mp.Process(target=start_search,
+			processes.append(mp.Process(target=startSearch,
                                           args=[queryPath, aFile, threshold,
                                                 jobQueue, resultsQueue]))
 		for process in processes:
@@ -159,19 +159,19 @@ def main():
 		for process in processes:
 			process.join()
 	else:
-		start_search(queryPath, dbPath, threshold, jobQueue, resultsQueue)
+		startSearch(queryPath, dbPath, threshold, jobQueue, resultsQueue)
 
 	print
 	print
 	print
 	print "*** FINAL RESULT ***"
-	job_lock.acquire()
-	while global_jobs.value:
+	jobLock.acquire()
+	while globalJobs.value:
 		result = resultsQueue.get()
 		if len(result) is not 0:
 			pprint(result)
-		global_jobs.value -= 1
-	job_lock.release()
+		globalJobs.value -= 1
+	jobLock.release()
 
 if __name__ == '__main__':
     main()

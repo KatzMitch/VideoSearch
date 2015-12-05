@@ -5,7 +5,7 @@
 from __future__ import division
 
 from framediff import frame_rmse
-from time_convert import seconds_to_timestamp
+from timeConvert import secondsToTimestamp
 from moviepy.video.io.ffmpeg_reader import FFMPEG_VideoReader
 from multiprocessing import Semaphore
 from pprint import pprint
@@ -16,30 +16,29 @@ from pprint import pprint
 # Args: path to query video, path to comparison video, start frame number, 
 # endframe number, callback to process results, RMSE threshold (a number from 
 # 0-255, realistically should be between 10-50)
-def comparechunk(queryVid_name, dbVid_name, 
-				 db_start, db_end, thresh = 30.0):
+def comparechunk(queryVidName, dbVidName, dbStart, dbEnd, thresh):
     # Create the FFMPEG class variables
-    dbVid = FFMPEG_VideoReader(dbVid_name)
-    queryVid = FFMPEG_VideoReader(queryVid_name)
+    dbVid = FFMPEG_VideoReader(dbVidName)
+    queryVid = FFMPEG_VideoReader(queryVidName)
 
     # Skip to the correct frames in the video
     frameQ = queryVid.get_frame(0)
-    dbVid.skip_frames(db_start)
+    dbVid.skip_frames(dbStart)
     frameD = dbVid.read_frame()
 
     scores = []
 
     # Compare the first frame in the query video to every frame in the chunk
-    below_thresh = []
-    for i in range(db_start, db_end):
+    belowThresh = []
+    for i in range(dbStart, dbEnd):
         score = frame_rmse(frameQ, frameD)
         # Immediately look at startframes below the threshold
         if frame_rmse(frameQ, frameD) < thresh:
             print "Found a frame below the threshold. Scanning sequence..."
-            score = startpoint_compare(queryVid_name, dbVid_name, i)
+            score = startpointCompare(queryVidName, dbVidName, i)
             if score < thresh and score is not None:
-                scores.append(({"Video Name":dbVid_name},
-                               {"Timestamp":seconds_to_timestamp(i / dbVid.fps)},
+                scores.append(({"Video Name":dbVidName},
+                               {"Timestamp":secondsToTimestamp(i / dbVid.fps)},
                                {"Frame Number": i},
                                {"Score":score}))
                 return scores
@@ -51,24 +50,24 @@ def comparechunk(queryVid_name, dbVid_name,
 
 # Startpoint compare take a frame number worth pursuing, and calculates the
 # average rmse value for the duration of the video starting at that point
-def startpoint_compare(queryVid_name, dbVid_name, db_start):
+def startpointCompare(queryVidName, dbVidName, dbStart):
 	#Create the FFMPEG class variables
-	dbVid = FFMPEG_VideoReader(dbVid_name)
-	queryVid = FFMPEG_VideoReader(queryVid_name)
+	dbVid = FFMPEG_VideoReader(dbVidName)
+	queryVid = FFMPEG_VideoReader(queryVidName)
 	length = queryVid.nframes
 
 	# Skip to the startpoint frame
-	dbVid.skip_frames(db_start)
+	dbVid.skip_frames(dbStart)
 	frameD = dbVid.read_frame()
 	frameQ = queryVid.read_frame()
 
-	run_avg = 0
+	runAvg = 0
 
 	# Calculate the RMSE for each frame
 	for i in range(0, length):
-		run_avg += frame_rmse(frameD, frameQ)
+		runAvg += frame_rmse(frameD, frameQ)
 		frameQ = queryVid.read_frame()
 		frameD = dbVid.read_frame()
 
 	# Return the average RMSE score
-	return run_avg / length
+	return runAvg / length
