@@ -17,6 +17,9 @@ from pprint import pprint
 import glob
 import os
 
+global_jobs = mp.Value("l", 0)
+job_lock = mp.Lock()
+
 class Consumer(mp.Process):
     """
     A consumer is a process that takes jobs off of a job queue, completes them,
@@ -53,10 +56,9 @@ def percent_to_thresh(percent):
 Generates jobs for consumer threads, starts each consumer, waits for all to complete.
 """
 def start_search(queryPath, dbPath, threshold, jobQueue, resultsQueue):
+    global global_jobs
     queryVid  = FFMPEG_VideoReader(queryPath)
     dbVid     = FFMPEG_VideoReader(dbPath)
-    #jobQueue      = mp.Queue()
-    #resultsQueue  = mp.Queue()
     boundaries = []
 
     # Both videos must have equal frame rates
@@ -99,15 +101,9 @@ def start_search(queryPath, dbPath, threshold, jobQueue, resultsQueue):
     for i in range(num_consumers):
         jobQueue.put(None)
     
-    # Print resultsQueue as things come in
-    while num_jobs:
-        result = resultsQueue.get()
-        if len(result) is not 0:
-            print 'Found match below specified threshold:',
-            pprint(result)
-        num_jobs -= 1
-
-    return
+    job_lock.acquire()
+    global_jobs.value += num_jobs
+    job_lock.release()
 
 def server_entry(queryPath, dbPath, threshold, resultsQueue):
 	jobQueue = mp.Queue()
@@ -127,6 +123,11 @@ def server_entry(queryPath, dbPath, threshold, resultsQueue):
 			process.join()
 	else:
 		start_search(queryPath, dbPath, threshold, jobQueue, resultsQueue)
+
+	job_lock.acquire()
+	return_val = global_jobs.value
+	job_lock.release()
+	return return_val
 
 def main():
 	"""
@@ -158,6 +159,18 @@ def main():
 			process.join()
 	else:
 		start_search(queryPath, dbPath, threshold, jobQueue, resultsQueue)
+
+	print
+	print
+	print
+	print "*** FINAL RESULT ***"
+	job_lock.acquire()
+	while global_jobs.value:
+		result = resultsQueue.get()
+		if len(result) is not 0:
+			pprint(result)
+		global_jobs.value -= 1
+	job_lock.release()
 
 if __name__ == '__main__':
     main()
