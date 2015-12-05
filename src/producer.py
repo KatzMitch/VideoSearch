@@ -119,14 +119,14 @@ def server_entry(queryPath, dbPath, threshold, resultsQueue):
 			print "testing:", queryPath, aFile, threshold
 			processes.append(mp.Process(target=start_search,
                                           args=[queryPath, aFile,
-                                                threshold, resultsQueue,
-                                                jobQueue]))
+                                                threshold, jobQueue,
+                                                resultsQueue]))
 		for process in processes:
 			process.start()
 		for process in processes:
 			process.join()
 	else:
-		start_search(queryPath, dbPath, threshold, resultsQueue, jobQueue)
+		start_search(queryPath, dbPath, threshold, jobQueue, resultsQueue)
 
 def main():
 	"""
