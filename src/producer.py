@@ -50,7 +50,7 @@ Translate a percentage threshold (passed by client) into a parameter within the
 range 10-60
 """
 def percent_to_thresh(percent):
-	return (percent/2) + 10
+	return (percent/3) + 10
 
 """
 Generates jobs for consumer threads, starts each consumer, waits for all to
