@@ -3,7 +3,7 @@
 # Modified by Alex King
 # Entrypoint function for videosearch program
 
-# To use: run "python producer.py input.mp4 database.mp4"
+# To use: run "python producer.py input.mp4 database.mp4 threshold"
 
 # This is the producer/interpreter module of our program. It is responsible for
 # surveying the input video and database videos, creating jobs with proper 
@@ -52,11 +52,11 @@ def percent_to_thresh(percent):
 """
 Generates jobs for consumer threads, starts each consumer, waits for all to complete.
 """
-def start_search(queryPath, dbPath, threshold):
+def start_search(queryPath, dbPath, threshold, jobQueue, resultsQueue):
     queryVid  = FFMPEG_VideoReader(queryPath)
     dbVid     = FFMPEG_VideoReader(dbPath)
-    jobQueue      = mp.Queue()
-    resultsQueue  = mp.Queue()
+    #jobQueue      = mp.Queue()
+    #resultsQueue  = mp.Queue()
     boundaries = []
 
     # Both videos must have equal frame rates
@@ -109,21 +109,24 @@ def start_search(queryPath, dbPath, threshold):
 
     return
 
-def server_entry(queryPath, dbPath, threshold):
+def server_entry(queryPath, dbPath, threshold, resultsQueue):
+	jobQueue = mp.Queue()
 	if os.path.isdir(dbPath):
 		files = glob.glob(dbPath+"*.mp4")
 		print files
-		pprocesses = []
+		processes = []
 		for aFile in files:
 			print "testing:", queryPath, aFile, threshold
 			processes.append(mp.Process(target=start_search,
-                                          args=[queryPath, aFile, threshold]))
+                                          args=[queryPath, aFile,
+                                                threshold, resultsQueue,
+                                                jobQueue]))
 		for process in processes:
 			process.start()
 		for process in processes:
 			process.join()
 	else:
-		start_search(queryPath, dbPath, threshold)
+		start_search(queryPath, dbPath, threshold, resultsQueue, jobQueue)
 
 def main():
 	"""
@@ -137,6 +140,8 @@ def main():
 	queryPath = sys.argv[1]
 	dbPath    = sys.argv[2]
 	threshold = percent_to_thresh(int(sys.argv[3]))
+	jobQueue = mp.Queue()
+	resultsQueue = mp.Queue()
 
 	if os.path.isdir(dbPath):
 		files = glob.glob(dbPath+"*.mp4")
@@ -145,13 +150,14 @@ def main():
 		for aFile in files:
 			print "testing:", queryPath, aFile, threshold
 			processes.append(mp.Process(target=start_search,
-                                          args=[queryPath, aFile, threshold]))
+                                          args=[queryPath, aFile, threshold,
+                                                jobQueue, resultsQueue]))
 		for process in processes:
 			process.start()
 		for process in processes:
 			process.join()
 	else:
-		start_search(queryPath, dbPath, threshold)
+		start_search(queryPath, dbPath, threshold, jobQueue, resultsQueue)
 
 if __name__ == '__main__':
     main()
