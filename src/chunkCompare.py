@@ -43,10 +43,10 @@ def comparechunk(queryVidName, dbVidName, dbStart, dbEnd, thresh):
             print "Found a frame below the threshold. Scanning sequence..."
             score = startpointCompare(queryVidName, dbVidName, i)
             if score < thresh and score is not None:
-                scores.append(({"Video Name":dbVidName},
-                               {"Timestamp":secondsToTimestamp(i / dbVid.fps)},
-                               {"Frame Number": i},
-                               {"Score":score}))
+                scores.append({"Video Name":dbVidName,
+                               "Timestamp":secondsToTimestamp(i / dbVid.fps),
+                               "Frame Number": i,
+                               "Score":score})
                 return scores
             else:
                 print "A sequence had a poor score of", score, ". Moving on..."
