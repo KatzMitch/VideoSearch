@@ -57,23 +57,23 @@ def startpointCompare(queryVidName, dbVidName, dbStart):
     Startpoint compare take a frame number worth pursuing, and calculates the
     average rmse value for the duration of the video starting at that point
     """
-	#Create the FFMPEG class variables
-	dbVid = FFMPEG_VideoReader(dbVidName)
-	queryVid = FFMPEG_VideoReader(queryVidName)
-	length = queryVid.nframes
+    #Create the FFMPEG class variables
+    dbVid = FFMPEG_VideoReader(dbVidName)
+    queryVid = FFMPEG_VideoReader(queryVidName)
+    length = queryVid.nframes
 
-	# Skip to the startpoint frame
-	dbVid.skip_frames(dbStart)
-	frameD = dbVid.read_frame()
-	frameQ = queryVid.read_frame()
+    # Skip to the startpoint frame
+    dbVid.skip_frames(dbStart)
+    frameD = dbVid.read_frame()
+    frameQ = queryVid.read_frame()
 
-	runAvg = 0
+    runAvg = 0
 
-	# Calculate the RMSE for each frame
-	for i in range(0, length):
-		runAvg += frame_rmse(frameD, frameQ)
-		frameQ = queryVid.read_frame()
-		frameD = dbVid.read_frame()
+    # Calculate the RMSE for each frame
+    for i in xrange(0, length):
+        runAvg += frame_rmse(frameD, frameQ)
+        frameQ = queryVid.read_frame()
+        frameD = dbVid.read_frame()
 
-	# Return the average RMSE score
-	return runAvg / length
+    # Return the average RMSE score
+    return runAvg / length
