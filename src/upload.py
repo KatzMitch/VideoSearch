@@ -25,9 +25,7 @@ def allowed_file(filename):
     return '.' in filename and \
            filename.rsplit('.', 1)[1] in app.config['ALLOWED_EXTENSIONS']
 
-# This route will show a form to perform an AJAX request
-# jQuery is loaded to execute the request and update the
-# value of the operation
+
 @app.route('/')
 def index():
     return render_template('format.html')
@@ -55,13 +53,14 @@ def upload():
         # return redirect(url_for('uploaded_file',
         #                          filename=filename))
 
+        # VIEW 2
         # Redirect the user to the video route, which
         # will play the uploaded video
         # VIEW: specs in the play.html file
         return redirect(url_for('video',
                                 filename=filename))
     # else:
-    # return page_not_found(404) <-----------------------------------error handler
+    # return page_not_found(404) <-----------------------------------------------error handler
 
 
 # ROOT FOR: VEIW 1
@@ -80,6 +79,9 @@ def video(filename):
                         title = filename,
                         video_file = filename)
 
+
+
+
 # need to actually code this this is an on-line example of an error handler and 
 # I need to make this work for our program along with a few other error handlers
 
@@ -88,4 +90,4 @@ def video(filename):
 #     return render_template('404.html'), 404
 
 if __name__ == '__main__':
-    app.run()
+    app.run(port=7070)

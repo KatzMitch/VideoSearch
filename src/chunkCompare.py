@@ -1,6 +1,8 @@
-# COMP50CP Final Project- Video Search
-# chunk_compare.py
-# File written by Mitchell Katz
+"""
+COMP50CP Final Project- Video Search
+chunk_compare.py
+File written by Mitchell Katz
+"""
 
 from __future__ import division
 
@@ -10,13 +12,15 @@ from moviepy.video.io.ffmpeg_reader import FFMPEG_VideoReader
 from multiprocessing import Semaphore
 from pprint import pprint
 
-# This function takes the names of the files to compare, and where in the
-# comparison file to begin checking from. Threshold is a user determined value
-# that they chose qualitatively, and the GUI turned into a quantitative number
-# Args: path to query video, path to comparison video, start frame number, 
-# endframe number, callback to process results, RMSE threshold (a number from 
-# 0-255, realistically should be between 10-50)
 def comparechunk(queryVidName, dbVidName, dbStart, dbEnd, thresh):
+    """
+    This function takes the names of the files to compare, and where in the
+    comparison file to begin checking from. Threshold is a user determined value
+    that they chose qualitatively, and the GUI turned into a quantitative number
+    Args: path to query video, path to comparison video, start frame number, 
+    endframe number, callback to process results, RMSE threshold (a number from 
+    0-255, realistically should be between 10-50)
+    """
     # Create the FFMPEG class variables
     dbVid = FFMPEG_VideoReader(dbVidName)
     queryVid = FFMPEG_VideoReader(queryVidName)
@@ -48,9 +52,11 @@ def comparechunk(queryVidName, dbVidName, dbStart, dbEnd, thresh):
 
     return scores
 
-# Startpoint compare take a frame number worth pursuing, and calculates the
-# average rmse value for the duration of the video starting at that point
 def startpointCompare(queryVidName, dbVidName, dbStart):
+    """
+    Startpoint compare take a frame number worth pursuing, and calculates the
+    average rmse value for the duration of the video starting at that point
+    """
 	#Create the FFMPEG class variables
 	dbVid = FFMPEG_VideoReader(dbVidName)
 	queryVid = FFMPEG_VideoReader(queryVidName)
