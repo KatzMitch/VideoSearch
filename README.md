@@ -1,25 +1,34 @@
-# comp50_videosearch
+COMP50 Parallel Reverse Video Search Engine
+Mitchell Katz, Alex King, Isabelle Sennett, Matthew Yaspan
+Sunday, December 6, 2015
 
-Fall 2015 COMP 50CP Parallel Video Search
+Summary:
+The Parallel Reverse Video Search Engine takes a video and searches a database
+to see whether the query video is a clip from one of the existing videos within
+the database.
 
-This is a private git repository for our project.
+This product could be used as a reverse search engine in case someone wanted to
+find what video a gif came from or as copywright protection, for example.
 
+Algorithm:
+The Video Search is based off of a frame-to-frame root mean squared error
+function. The RMSE function calculates the difference in brightness between
+every pixel in two images. Final results are based off of the mean RMSE score
+for two images. We have parallelized the search so that multiple videos can be
+searched at once, and multiple chunks of a video can be searched in parallel.
 
-General flow of program:
+Currently, our program works reliably on identical clips from a video, however
+it does have trouble accounting for things like letterboxing, resolution
+differences, and transformations (such as flipping across an axis)
 
-GUI in which user selects a video gif to compare against the library
+Files:
+Reverse Search Engine Files:
+* framediff.py - Calculates a RMSE difference for 2 PNG images
+* chunkCompare.py - Calculates a close matching segment between a query video
+  and a comparison video by calculating the mean RMSE score for a segment
+* producer.py - Creates chunks to call chunkCompare on
 
-User searches.
+Web Application Files:
 
-We compare a sample of frames in parallel against our limited database set.
-
-Perhaps against some transforms of our database set
-
-return best match(es)
-
-Things we want to use Libraries for:
-
-
-GUI
-Threading
-
+Note that this application relies on the MoviePy module, created by GitHub user
+Zulko https://github.com/Zulko, which in turn calls the FFMPEG file
