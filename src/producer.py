@@ -1,13 +1,15 @@
-# producer.py
-# COMP 50CP: videosearch project
-# Modified by Alex King
-# Entrypoint function for videosearch program
+"""
+producer.py
+COMP 50CP: videosearch project
+Modified by Alex King and Mitchell Katz
+Entrypoint function for videosearch program
 
-# To use: run "python producer.py input.mp4 /path/to/database/ threshold"
+To use: run "python producer.py input.mp4 /path/to/database/ threshold"
 
-# This is the producer/interpreter module of our program. It is responsible for
-# surveying the input video and database videos, creating jobs with proper 
-# length, and telling each consumer to process jobs until all are complete.
+This is the producer/interpreter module of our program. It is responsible for
+surveying the input video and database videos, creating jobs with proper 
+length, and telling each consumer to process jobs until all are complete.
+"""
 
 import sys
 import multiprocessing as mp
@@ -45,19 +47,19 @@ class Consumer(mp.Process):
             self.resultQueue.put(answer)
         return
 
-"""
-Translate a percentage threshold (passed by client) into a parameter within the
-range 10-60
-"""
 def percentToThresh(percent):
+    """
+    Translate a percentage threshold (passed by client) into a parameter within the
+    range ~10-45
+    """
 	return (percent/3) + 10
 
-"""
-Generates jobs for consumer threads, starts each consumer, waits for all to
-complete.
-"""
 def startSearch(queryPath, dbPath, threshold, jobQueue, resultsQueue):
-    global globalKobs
+    """
+    Generates jobs for consumer threads, starts each consumer, waits for all to
+    complete.
+    """
+    global globalJobs
     queryVid  = FFMPEG_VideoReader(queryPath)
     dbVid     = FFMPEG_VideoReader(dbPath)
     boundaries = []
