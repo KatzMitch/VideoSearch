@@ -21,29 +21,29 @@ globalJobs = mp.Value("l", 0)
 jobLock = mp.Lock()
 
 class Consumer(mp.Process):
-    """
-    A consumer is a process that takes jobs off of a job queue, completes them,
-    and adds its answer to the result queue. In our case, each job is a list of
-    arguments to comparechunk.
-    """
-    def __init__(self, taskQueue, resultQueue):
-        mp.Process.__init__(self)
-        self.taskQueue = taskQueue
-        self.resultQueue = resultQueue
+	"""
+	A consumer is a process that takes jobs off of a job queue, completes them,
+	and adds its answer to the result queue. In our case, each job is a list of
+	arguments to comparechunk.
+	"""
+	def __init__(self, taskQueue, resultQueue):
+		mp.Process.__init__(self)
+		self.taskQueue = taskQueue
+		self.resultQueue = resultQueue
 
-    def run(self):
-        procName = self.name
-        while True:
-            nextTask = self.taskQueue.get()
-            if nextTask is None:
-                print '%s: Exiting' % procName
-                break
-            print '%s: %s' % (procName, nextTask)
-            answer = comparechunk(nextTask[0], nextTask[1], 
-                                  nextTask[2], nextTask[3],
-                                  nextTask[4])
-            self.resultQueue.put(answer)
-        return
+	def run(self):
+		procName = self.name
+		while True:
+			nextTask = self.taskQueue.get()
+			if nextTask is None:
+				print '%s: Exiting' % procName
+				break
+			print '%s: %s' % (procName, nextTask)
+			answer = comparechunk(nextTask[0], nextTask[1], 
+								  nextTask[2], nextTask[3],
+								  nextTask[4])
+			self.resultQueue.put(answer)
+		return
 
 """
 Translate a percentage threshold (passed by client) into a parameter within the
@@ -57,54 +57,61 @@ Generates jobs for consumer threads, starts each consumer, waits for all to
 complete.
 """
 def startSearch(queryPath, dbPath, threshold, jobQueue, resultsQueue):
-    global globalKobs
-    queryVid  = FFMPEG_VideoReader(queryPath)
-    dbVid     = FFMPEG_VideoReader(dbPath)
-    boundaries = []
+	global globalJobs
+	queryVid  = FFMPEG_VideoReader(queryPath)
+	dbVid     = FFMPEG_VideoReader(dbPath)
+	boundaries = []
 
-    # Both videos must have equal frame rates
-    if queryVid.fps != dbVid.fps:
+	# Both videos must have equal frame rates
+	if queryVid.fps != dbVid.fps:
 		print "FPSs must match!"
 		return
 
-    # Make ranges that are the length of the input video
-    width = queryVid.nframes
-    startFrame = 0
+	# Make ranges that are the length of the input video
+	width = queryVid.nframes
+	startFrame = 0
 
-    if width > dbVid.nframes:
-        width = dbVid.nframes
+	if width > dbVid.nframes:
+		width = dbVid.nframes
 
-    boundaries.append([startFrame, startFrame + width])
+	boundaries.append([startFrame, startFrame + width])
 
-    while startFrame < (dbVid.nframes - width):
-        startFrame += queryVid.nframes
-        boundaries.append([startFrame, startFrame + width])
+	while startFrame < (dbVid.nframes - width):
+		startFrame += queryVid.nframes
+		boundaries.append([startFrame, startFrame + width])
 
-    numConsumers = 16 # This can be easily modified
-    numJobs      = len(boundaries)
+	numConsumers = 16 # This can be easily modified
+	numJobs      = len(boundaries)
 
-    print "Threshold:", threshold
-    print 'Creating %d consumers' % numConsumers
-    consumers = [ Consumer(jobQueue, resultsQueue)
-                  for i in xrange(numConsumers) ]
+	print "Threshold:", threshold
+	print 'Creating %d consumers' % numConsumers
+	consumers = [ Consumer(jobQueue, resultsQueue)
+				  for i in xrange(numConsumers) ]
 
-    # Prepare the workers to consume jobs
-    for worker in consumers:
-        worker.start()
+	# Prepare the workers to consume jobs
+	for worker in consumers:
+		worker.start()
 
-    # Now we need to make a job queue. A job must have all of the arguments for 
-    # comparechunk.
-    for item in boundaries:
-        jobQueue.put([queryPath, dbPath, item[0], item[1], threshold])
+	# Now we need to make a job queue. A job must have all of the arguments for 
+	# comparechunk.
+	for item in boundaries:
+		jobQueue.put([queryPath, dbPath, item[0], item[1], threshold])
 
-    # This technique forces each thread to eventually consume a job that tells
-    # them to stop, allowing us to join safely afterwards.
-    for i in range(numConsumers):
-        jobQueue.put(None)
-    
-    jobLock.acquire()
-    globalJobs.value += numJobs
-    jobLock.release()
+	# This technique forces each thread to eventually consume a job that tells
+	# them to stop, allowing us to join safely afterwards.
+	for i in range(numConsumers):
+		jobQueue.put(None)
+
+	print "Nones have been put on the queue for video", dbPath
+	
+	jobLock.acquire()
+	globalJobs.value += numJobs
+	jobLock.release()
+
+	print "Jobs have been incremeneted for video", dbPath
+	print "Returning should happen right now"
+
+	return True
 
 def serverEntry(queryPath, dbPath, threshold, resultsQueue):
 	jobQueue = mp.Queue()
@@ -115,13 +122,13 @@ def serverEntry(queryPath, dbPath, threshold, resultsQueue):
 		for aFile in files:
 			print "testing:", queryPath, aFile, threshold
 			processes.append(mp.Process(target=startSearch,
-                                          args=[queryPath, aFile,
-                                                threshold, jobQueue,
-                                                resultsQueue]))
+										  args=[queryPath, aFile,
+												threshold, jobQueue,
+												resultsQueue]))
 		for process in processes:
 			process.start()
 		for process in processes:
-			process.join()
+			process.join(1)
 	else:
 		startSearch(queryPath, dbPath, threshold, jobQueue, resultsQueue)
 
@@ -152,19 +159,22 @@ def main():
 		for aFile in files:
 			print "testing:", queryPath, aFile, threshold
 			processes.append(mp.Process(target=startSearch,
-                                          args=[queryPath, aFile, threshold,
-                                                jobQueue, resultsQueue]))
+										  args=[queryPath, aFile, threshold,
+												jobQueue, resultsQueue]))
 		for process in processes:
 			process.start()
 		for process in processes:
-			process.join()
+			process.join(1)
 	else:
 		startSearch(queryPath, dbPath, threshold, jobQueue, resultsQueue)
 
+	print "Total number of jobs is", globalJobs.value
 	print
 	print
 	print
 	print "*** FINAL RESULT ***"
+
+	print "Okay, now the total number of jobs is", globalJobs.value
 	jobLock.acquire()
 	while globalJobs.value:
 		result = resultsQueue.get()
@@ -174,4 +184,4 @@ def main():
 	jobLock.release()
 
 if __name__ == '__main__':
-    main()
+	main()
