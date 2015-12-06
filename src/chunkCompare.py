@@ -1,7 +1,9 @@
 """
 COMP50CP Final Project- Video Search
-chunk_compare.py
+chunkCompare.py
 File written by Mitchell Katz
+This module calls the RMSE function between a query video and chunk of a video
+from a database
 """
 
 from __future__ import division

@@ -1,20 +1,22 @@
-# COMP 50CP: videosearch project
-# Modified by Alex King
-# Parallel RMSE difference between two RGB image buffers
+"""
+COMP 50CP: videosearch project
+Modified by Alex King
+Parallel RMSE difference between two RGB image buffers
 
-# To use: import frame_rmse from this module. Call it with two NumPy arrays 
-# returned from MoviePy.
+To use: import frame_rmse from this module. Call it with two NumPy arrays 
+returned from MoviePy.
 
-# This is a basic and naive image comparison algorithm using the multiprocessing
-# library. Multiprocessing allows for a speedup of approximately 75% going from
-# one core up to the currently configured 16 cores.
+This is a basic and naive image comparison algorithm using the multiprocessing
+library. Multiprocessing allows for a speedup of approximately 75% going from
+one core up to the currently configured 16 cores.
 
-# frame_rmse is the only public function of the module.
-# frame_rmse returns the root-mean-square error between two images.
-# A value of 0.0 indicates identical images. A maximum value of 255.0 indicates
-# completely dissimilar images; for example, a white square and a black square.
-# The same image, resized and possibly compressed, should yield a score in the 
-# single digits.
+frame_rmse is the only public function of the module.
+frame_rmse returns the root-mean-square error between two images.
+A value of 0.0 indicates identical images. A maximum value of 255.0 indicates
+completely dissimilar images; for example, a white square and a black square.
+The same image, resized and possibly compressed, should yield a score in the 
+single digits.
+"""
 
 import sys
 import math
