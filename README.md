@@ -29,8 +29,13 @@ Reverse Search Engine Files:
 * chunkCompare.py - Calculates a close matching segment between a query video
   and a comparison video by calculating the mean RMSE score for a segment
 * producer.py - Creates chunks to call chunkCompare on
+* timeConvert.py - Short module to convert between timestamps and second count
 
 Web Application Files:
+* server.py - Code to set up server
+* static_website.py - Flask code to interact with website
+* stream_vid.py - Code to handle streaming videos
+* upload.py - Code to handle user video uploads
 
 Note that this application relies on the MoviePy module, created by GitHub user
 Zulko https://github.com/Zulko, which in turn calls the FFMPEG file
