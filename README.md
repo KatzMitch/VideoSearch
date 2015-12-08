@@ -1,6 +1,6 @@
 COMP50 Parallel Reverse Video Search Engine
 
-Mitchell Katz, Alex King, Isabelle Sennett, Matthew Yaspan
+(c) Mitchell Katz and Alex King
 
 Sunday, December 6, 2015
 
