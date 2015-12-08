@@ -1,4 +1,4 @@
-COMP50 Parallel Reverse Video Search Engine
+Parallel Reverse Video Search Engine
 
 (c) Mitchell Katz and Alex King
 
@@ -11,6 +11,14 @@ the database.
 
 This product could be used as a reverse search engine in case someone wanted to
 find what video a gif came from or as copywright protection, for example.
+
+This was a project that I started for my Concurrent Programming class in Fall
+2015, but I hope to continue work on it.
+
+Potential modifications:
+* Improve the GUI
+* Use a more concrete frame differentiation algorithm
+* Optimize startpointCompare function by skipping every 2-5 frames
 
 Algorithm:
 The Video Search is based off of a frame-to-frame root mean squared error
