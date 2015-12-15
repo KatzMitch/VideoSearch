@@ -47,15 +47,6 @@ class Consumer(mp.Process):
             self.resultQueue.put(answer)
         return
 
-
-def percentToThresh(percent):
-    """
-    Translate a percentage threshold (passed by client) into a parameter within the
-    range 10-60
-    """
-    return (percent/3) + 10
-
-
 def startSearch(queryPath, dbPath, threshold, jobQueue, resultsQueue):
     """
     Generates jobs for consumer threads, starts each consumer, waits for all to
@@ -106,7 +97,7 @@ def startSearch(queryPath, dbPath, threshold, jobQueue, resultsQueue):
     for i in range(numConsumers):
         jobQueue.put(None)
 
-    print "Nones have been put on the queue for video", dbPath
+    print "None have been put on the queue for video", dbPath
     
     jobLock.acquire()
     globalJobs.value += numJobs
@@ -145,18 +136,11 @@ def serverEntry(queryPath, dbPath, threshold, resultsQueue):
     jobLock.release()
     return returnVal
 
-def main():
+def consoleEntry(queryPath, dbPath, threshold):
     """
-    Parses command line arguments for a query video and database video.
+    Parses input passed in via console into query path, db path, and threshold.
     threshold is a number from 0-100 which we translate into a threshold value
     """
-    if len(sys.argv) != 4:
-        print "Usage: python producer.py input.mp4 source.mp4 threshold"
-        exit(1)
-
-    queryPath = sys.argv[1]
-    dbPath    = sys.argv[2]
-    threshold = percentToThresh(int(sys.argv[3]))
     jobQueue = mp.Queue()
     resultsQueue = mp.Queue()
 
@@ -190,6 +174,3 @@ def main():
             pprint(result)
         globalJobs.value -= 1
     jobLock.release()
-
-if __name__ == '__main__':
-    main()

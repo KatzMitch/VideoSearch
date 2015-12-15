@@ -1,0 +1,66 @@
+<!-- Created by: Isabelle Sennett Note: used design story from last design document-->
+
+<!DOCTYPE html>
+<html>
+<head>
+    <link href="/static/css/main.css" rel="stylesheet">
+    <script src="/static/js/jquery.min.js" type="text/javascript">
+    </script>
+    <script src="/static/js/bootstrap.min.js" type="text/javascript">
+    </script>
+    <script src="/static/js/main.js" type="text/javascript">
+    </script>
+
+    <meta content="width=device-width, initial-scale=1" name="viewport">
+    <title></title>
+</head>
+<body>
+    <div class="site-wrapper">
+        <div class="site-wrapper-inner">
+            <div class="cover-container">
+                <header class="masthead clearfix">
+                    <div class="inner">
+                        <h3 class="masthead-brand">videosearch</h3>
+                        <nav class="nav nav-masthead">
+                            <a class="nav-link" href="/">Home</a>
+                            <a class="nav-link active" href="/about/">About</a>
+                            <a class="nav-link" href="/help/">Help</a>
+                        </nav>
+                    </div>
+                </header>
+
+                <main class="inner cover">
+                    <section class="page-about">
+                    <p>&nbsp;</p>
+                    <p>&nbsp;</p>
+                    <p>&nbsp;</p>
+                    <h5 class="about">Design Story</h5>
+                        <p><span>For our final project, we will be implementing a </span>
+                            <span style="font-style: italic">video content matching </span>
+                            <span>program; effectively a search-by-video search engine. This is an
+                            interesting and open problem in computing, and it has very practical 
+                            applications in areas such as copyright protection. </span>
+                        </p>
+
+<p><span>To match the content of video, there are several possible approaches. Many videos include video and audio, so some sort of programmatic matching of video frames and/or audio needs to take place. We have chosen to focus on video content matching rather than audio content matching. In order to detect similarity between two videos, the content needs to be mathematically represented, and two representations need to be evaluated for closeness. One such way of matching video content is with motion vectors, which are a way of detecting position of objects and their movement during a video. This is a powerful mechanism that leads to versatile matching, but it is complex and beyond the scope of what we feel we can accomplish in this project&rsquo;s timeframe. </span></p>
+
+<p><span>Instead, we have chosen a more straightforward approach: match videos by matching a sequence of frames as images. If we can define similarity between two still images, we can average it over a sequence of images and make a prediction as to whether two videos share the same content or not. This pushes our solution to rely on one of several different image similarity algorithms. We want to strike a balance between designing the algorithm ourselves and achieving comparison accuracy that is as good as possible. </span></p>
+
+<p><span>We have a few ideas for image comparison modules, and we plan on implementing increasingly complex ones as time allows. The first and most naïve module will be a root-mean-square error comparison much like the </span><span style="font-style: italic">ppmdiff </span><span>program from COMP 40. This is a brute force mathematical similarity between two images of the same size. It works well for detecting subtle changes due to compression, but can easily fail if slight transformations are applied to the image. A second, more resilient algorithm will be a histogram-of-quadrants approach, where subsections of an image are tallied for color distribution, and each quadrant is compared for similarity. A third, further resilient algorithm would focus on more attributes of an image, such as edge and point detection. This type of comparison becomes more complicated. We will not demonstrate the use of any predefined image comparison libraries unless we have already designed a few of our own. The image comparison module we have used here is root-mean-square error comparison.</span></p>
+
+<p><span>We will store a local database of videos that a producer will scan and analyze for scannable subsections of a proper size, which will become jobs. Multiple worker threads will process these jobs, searching small subsequences of the video database, checking for similar frames and returning an overall score of similarity, which will then be &ldquo;interpreted&rdquo; by our program, eventually returning a score and information to the user. </span></p>
+
+                    <p>&nbsp;</p>
+                    <p>&nbsp;</p>
+                    <p>&nbsp;</p>
+                    </section>
+                </main>
+
+                <footer class="mastfoot">
+                    <p>&copy; 2015 &mdash; Alex, Matt, Mitchell, Isabelle</p>
+                </footer>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

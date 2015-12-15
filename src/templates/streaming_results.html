@@ -1,0 +1,16 @@
+<!-- Created by: Isabelle Sennett -->
+
+{% extends 'base.html' %}
+{% block play %}
+{% for item in video_files %}
+    <div class="card result-card">
+        <video src="/static/video/{{ item }}"></video>
+        <div class="card-block">
+            <h4 class="card-title">{{ item[0] }}</h4>
+            <p class="card-text">Timestamp: {{ item[1] }}</p>
+            <p class="card-text">Frame Number: {{ item[2] }}</p>
+            <p class="card-text">Score: {{ item[3] }}</p>
+        </div>
+    </div>
+{% endfor %}
+{% endblock %}

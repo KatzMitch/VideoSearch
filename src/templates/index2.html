@@ -1,9 +1,0 @@
-<!-- index.html inherits our base.html -->
-
-{% extends 'base.html' %}
-{% block play %}
-    {% for item in video_files %}
-<!--    _blank make it open in a new window -->
-        <p><a target="_blank" href="/{{ item }}"> {{ item }} </a></p>
-    {% endfor %}
-{% endblock %}

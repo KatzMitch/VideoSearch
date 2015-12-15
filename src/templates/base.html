@@ -1,11 +1,48 @@
+<!-- Created by: Isabelle Sennett 
+Note: should have used this as a base for some of my other html files instead 
+      of copying this into them-->
+
 <!DOCTYPE html>
 <html>
-    <h1>Video Search</h1>
-    <head>
-        <meta charset="utf-8">
-        <title>Media Player - {{ title }}</title>
-    </head>
-    <body>
-        {% block play%}{% endblock %}
-    </body>
+<head>
+    <link href="/static/css/main.css" rel="stylesheet">
+    <script src="/static/js/jquery.min.js" type="text/javascript">
+    </script>
+    <script src="/static/js/bootstrap.min.js" type="text/javascript">
+    </script>
+    <script src="/static/js/main.js" type="text/javascript">
+    </script>
+
+    <meta content="width=device-width, initial-scale=1" name="viewport">
+    <title></title>
+</head>
+<body>
+    <div class="site-wrapper">
+        <div class="site-wrapper-inner">
+            <div class="cover-container">
+                <header class="masthead clearfix">
+                    <div class="inner">
+                        <h3 class="masthead-brand">videosearch</h3>
+                        <nav class="nav nav-masthead">
+                            <a class="nav-link active" href="/">Home</a>
+                            <a class="nav-link" href="/about/">About</a>
+                            <a class="nav-link" href="/help/">Help</a>
+                        </nav>
+                    </div>
+                </header>
+
+                <main class="inner cover">
+                    <section class="page-results">
+                    {% block play%}{% endblock %}
+
+                    </section>
+                </main>
+
+                <footer class="mastfoot">
+                    <p>&copy; 2015 &mdash; Alex, Matt, Mitchell, Isabelle</p>
+                </footer>
+            </div>
+        </div>
+    </div>
+</body>
 </html>
